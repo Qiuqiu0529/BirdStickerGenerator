@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>防鸟撞贴纸生成器 v16</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: flex;
+            min-height: 700px;
+        }
+
+        .sidebar {
+            width: 380px;
+            padding: 25px;
+            border-right: 1px solid #e0e0e0;
+            overflow-y: auto;
+            max-height: calc(100vh - 200px);
+        }
+
+        .preview-area {
+            flex: 1;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 6px;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: #e0e0e0;
+        }
+
+        input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .range-value {
+            display: inline-block;
+            min-width: 35px;
+            text-align: right;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #17a2b8;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .bg-selector {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .bg-btn {
+            width: 36px;
+            height: 36px;
+            border: 3px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bg-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .bg-btn.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .bg-checkerboard {
+            background-image: 
+                linear-gradient(45deg, #ccc 25%, transparent 25%),
+                linear-gradient(-45deg, #ccc 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #ccc 75%),
+                linear-gradient(-45deg, transparent 75%, #ccc 75%);
+            background-size: 10px 10px;
+            background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+        }
+
+        .bg-black { background: #000; }
+        .bg-gray { background: #808080; }
+        .bg-white { background: #fff; border: 1px solid #ddd; }
+
+        .canvas-wrapper {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .transform-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .transform-overlay.active {
+            pointer-events: auto;
+        }
+
+        .transform-box {
+            position: absolute;
+            border: 2px solid #667eea;
+            background: rgba(102, 126, 234, 0.05);
+            cursor: move;
+            pointer-events: auto;
+        }
+
+        .transform-box.selected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+        }
+
+        .corner-handle {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .corner-handle:hover {
+            background: #667eea;
+            transform: scale(1.2);
+        }
+
+        .handle-nw { top: -7px; left: -7px; cursor: nw-resize; }
+        .handle-ne { top: -7px; right: -7px; cursor: ne-resize; }
+        .handle-sw { bottom: -7px; left: -7px; cursor: sw-resize; }
+        .handle-se { bottom: -7px; right: -7px; cursor: se-resize; }
+
+        .rotate-handle {
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 18px;
+            height: 18px;
+            background: #667eea;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .rotate-handle::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 18px;
+            background: #667eea;
+        }
+
+        .status-bar {
+            margin-top: 12px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+            text-align: center;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        small {
+            display: block;
+            margin-top: 4px;
+            font-size: 11px;
+            color: #999;
+        }
+
+        .object-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .object-item {
+            padding: 8px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .object-item:hover {
+            background: #e7f3ff;
+        }
+
+        .object-item.active {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦅 防鸟撞贴纸生成器 v16</h1>
+            <p>多对象独立控制 · 三层波点系统 · 实时预览</p>
+        </div>
+
+        <div class="content">
+            <!-- 左侧控制面板 -->
+            <div class="sidebar">
+                <!-- 1. 上传图片 -->
+                <div class="section">
+                    <div class="section-title">📸 上传图片</div>
+                    <div class="input-group">
+                        <input type="file" id="birdImage" accept="image/*">
+                    </div>
+                </div>
+
+                <!-- 2. 对象列表 -->
+                <div class="section">
+                    <div class="section-title">🎯 对象选择</div>
+                    <div class="object-list" id="objectList">
+                        <div class="object-item" data-object="image">
+                            📷 鸟类图片
+                        </div>
+                        <div class="object-item" data-object="name">
+                            📝 名称文字
+                        </div>
+                    </div>
+                    <small>点击对象进行编辑</small>
+                </div>
+
+                <!-- 3. 图像分割 -->
+                <div class="section">
+                    <div class="section-title">✂️ 图像分割</div>
+                    <div class="input-group">
+                        <label>分割方法</label>
+                        <select id="segmentMethod">
+                            <option value="color_remove">去除纯色背景（推荐）</option>
+                            <option value="alpha">透明通道</option>
+                            <option value="threshold">亮度阈值</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            容差: <span class="range-value" id="toleranceValue">40</span>
+                        </label>
+                        <input type="range" id="toleranceSlider" min="10" max="100" value="40">
+                        <small>值越大，保留越多；建议30-50</small>
+                    </div>
+                    <button class="btn btn-secondary" id="segmentBtn" disabled>
+                        执行分割
+                    </button>
+                    <div id="segmentStatus" style="margin-top: 8px; font-size: 12px; color: #666;"></div>
+                </div>
+
+                <!-- 4. 波点背景层 -->
+                <div class="section">
+                    <div class="section-title">🎨 波点背景层</div>
+                    <div class="input-group">
+                        <label>波点形状</label>
+                        <select id="bgDotShape">
+                            <option value="circle">⚫ 圆点</option>
+                            <option value="star">⭐ 星形</option>
+                            <option value="heart">❤️ 爱心</option>
+                            <option value="square">◼️ 方形</option>
+                            <option value="triangle">▲ 三角形</option>
+                            <option value="svg">🎨 自定义SVG</option>
+                        </select>
+                    </div>
+                    <div class="input-group" id="bgSvgInput" style="display: none;">
+                        <label>SVG路径 (d属性)</label>
+                        <input type="text" id="bgSvgPath" placeholder="例: M0,-5 L5,5 L-5,5 Z">
+                        <small>输入SVG path的d属性</small>
+                    </div>
+                    <div class="input-group">
+                        <label>波点颜色</label>
+                        <input type="color" id="bgDotColor" value="#ffffff">
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            波点大小: <span class="range-value" id="bgDotSizeValue">5</span> px
+                        </label>
+                        <input type="range" id="bgDotSize" min="1" max="15" value="5">
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            波点间隔: <span class="range-value" id="bgDotSpacingValue">25</span> px
+                        </label>
+                        <input type="range" id="bgDotSpacing" min="5" max="60" value="25">
+                        <small>规律网格间距</small>
+                    </div>
+                </div>
+
+                <!-- 5. 鸟区波点层 -->
+                <div class="section">
+                    <div class="section-title">🦅 鸟区波点层</div>
+                    <div class="input-group">
+                        <label>波点形状</label>
+                        <select id="birdDotShape">
+                            <option value="circle">⚫ 圆点</option>
+                            <option value="star">⭐ 星形</option>
+                            <option value="heart">❤️ 爱心</option>
+                            <option value="square">◼️ 方形</option>
+                            <option value="triangle">▲ 三角形</option>
+                            <option value="svg">🎨 自定义SVG</option>
+                        </select>
+                    </div>
+                    <div class="input-group" id="birdSvgInput" style="display: none;">
+                        <label>SVG路径 (d属性)</label>
+                        <input type="text" id="birdSvgPath" placeholder="例: M0,-5 L5,5 L-5,5 Z">
+                        <small>输入SVG path的d属性</small>
+                    </div>
+                    <div class="input-group">
+                        <label>波点颜色</label>
+                        <input type="color" id="birdDotColor" value="#ffffff">
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            波点大小: <span class="range-value" id="birdDotSizeValue">5</span> px
+                        </label>
+                        <input type="range" id="birdDotSize" min="1" max="15" value="5">
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            波点间隔: <span class="range-value" id="birdDotSpacingValue">8</span> px
+                        </label>
+                        <input type="range" id="birdDotSpacing" min="5" max="30" value="8">
+                        <small>采样间隔，越小越密集</small>
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            密度系数: <span class="range-value" id="birdDensityValue">1</span>
+                        </label>
+                        <input type="range" id="birdDensity" min="0" max="5" step="0.5" value="1">
+                        <small>颜色越深越稀疏，越浅越密集</small>
+                    </div>
+                    <button class="btn btn-success" id="generateDotsBtn" disabled>
+                        生成波点
+                    </button>
+                </div>
+
+                <!-- 6. 名称设置 -->
+                <div class="section">
+                    <div class="section-title">📝 名称设置</div>
+                    <div class="input-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="showName" checked>
+                            <label>显示名称</label>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>中文名</label>
+                        <input type="text" id="birdNameCN" placeholder="例：黑脸琵鹭">
+                    </div>
+                    <div class="input-group">
+                        <label>学名</label>
+                        <input type="text" id="birdNameEN" placeholder="例：Platalea minor">
+                    </div>
+                </div>
+
+                <!-- 7. 下载 -->
+                <div class="section">
+                    <div class="section-title">💾 导出</div>
+                    <button class="btn btn-warning" id="downloadBtn" disabled>
+                        下载 PNG
+                    </button>
+                </div>
+            </div>
+
+            <!-- 右侧预览区域 -->
+            <div class="preview-area">
+                <div class="canvas-container">
+                    <div class="preview-header">
+                        <span style="font-weight: 600; color: #666;">实时预览</span>
+                        <div class="bg-selector">
+                            <span style="font-size: 13px; color: #666;">背景:</span>
+                            <div class="bg-btn bg-checkerboard active" data-bg="checkerboard"></div>
+                            <div class="bg-btn bg-black" data-bg="black"></div>
+                            <div class="bg-btn bg-gray" data-bg="gray"></div>
+                            <div class="bg-btn bg-white" data-bg="white"></div>
+                        </div>
+                    </div>
+
+                    <div class="canvas-wrapper">
+                        <canvas id="previewCanvas" width="800" height="800"></canvas>
+                        <div class="transform-overlay active" id="transformOverlay">
+                            <!-- 变换框动态生成 -->
+                        </div>
+                    </div>
+
+                    <div class="status-bar" id="statusBar">
+                        上传图片开始，点击对象可编辑
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 核心数据结构 ====================
+        
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 对象系统
+        const objects = {
+            image: {
+                type: 'image',
+                data: null,              // 原始图片
+                segmented: null,         // 分割后的图片
+                mask: null,              // 分割蒙版
+                transform: {
+                    x: 0, y: 0,
+                    scale: 0.8,
+                    rotation: 0
+                },
+                visible: true
+            },
+            name: {
+                type: 'text',
+                cn: '',
+                en: '',
+                transform: {
+                    x: 0,
+                    y: 0,
+                    scale: 1,
+                    rotation: 0
+                },
+                fontSize: 48,  // 增大到48px，更醒目
+                visible: true
+            }
+        };
+        
+        let currentObject = 'image';  // 当前选中对象
+        let currentBgType = 'checkerboard';
+        
+        // 波点配置
+        const dotsConfig = {
+            bg: {
+                color: '#ffffff',
+                size: 5,        // 1-15px，默认5px
+                spacing: 25,    // 5-60px，默认25px
+                shape: 'circle',
+                svgPath: ''
+            },
+            bird: {
+                color: '#ffffff',
+                size: 5,        // 1-15px，默认5px
+                spacing: 8,     // 5-30px，默认8px
+                density: 1,
+                shape: 'circle',
+                svgPath: ''
+            }
+        };
+        
+        let dotsGenerated = false;
+        let dotsImageData = null;  // 保存生成的波点图像
+        
+        // ==================== 渲染系统 ====================
+        
+        function renderBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            switch(currentBgType) {
+                case 'checkerboard':
+                    const size = 20;
+                    for (let x = 0; x < canvas.width; x += size) {
+                        for (let y = 0; y < canvas.height; y += size) {
+                            ctx.fillStyle = (x / size + y / size) % 2 === 0 ? '#ffffff' : '#cccccc';
+                            ctx.fillRect(x, y, size, size);
+                        }
+                    }
+                    break;
+                case 'black':
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    break;
+                case 'gray':
+                    ctx.fillStyle = '#808080';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    break;
+                case 'white':
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    break;
+            }
+        }
+        
+        function renderImage(imgObj) {
+            if (!imgObj.data || !imgObj.visible) return null;
+            
+            // 优先使用分割后的图片，如果没有分割则使用原图
+            const img = imgObj.segmented ? imgObj.segmented : imgObj.data;
+            const t = imgObj.transform;
+            
+            const nameSpace = 80;
+            const availableHeight = canvas.height - nameSpace;
+            const baseScale = Math.min(canvas.width / img.width, availableHeight / img.height);
+            const finalScale = baseScale * t.scale;
+            
+            const w = img.width * finalScale;
+            const h = img.height * finalScale;
+            const centerX = canvas.width / 2 + t.x;
+            const centerY = availableHeight / 2 + t.y;
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(t.rotation * Math.PI / 180);
+            
+            if (dotsGenerated && dotsImageData) {
+                // 显示波点效果（需要创建临时画布来缩放）
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = dotsImageData.width;
+                tempCanvas.height = dotsImageData.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCtx.putImageData(dotsImageData, 0, 0);
+                ctx.drawImage(tempCanvas, -w / 2, -h / 2, w, h);
+            } else {
+                ctx.drawImage(img, -w / 2, -h / 2, w, h);
+            }
+            
+            ctx.restore();
+            
+            return { w, h, centerX, centerY };
+        }
+        
+        function renderText(textObj) {
+            if (!textObj.visible) {
+                console.log('文字不可见，跳过渲染');
+                return null;
+            }
+            
+            // 检查是否有内容
+            if (!textObj.cn && !textObj.en) {
+                console.log('文字内容为空');
+                return null;
+            }
+            
+            console.log('渲染文字:', textObj.cn, textObj.en, 'fontSize:', textObj.fontSize);
+            
+            const t = textObj.transform;
+            // 文字位置：底部留出80px空间
+            const centerX = canvas.width / 2 + t.x;
+            const centerY = canvas.height - 80 + t.y;
+            
+            console.log('文字位置:', centerX, centerY);
+            
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.rotate(t.rotation * Math.PI / 180);
+            ctx.scale(t.scale, t.scale);
+            
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 使用鸟区波点颜色（与波点保持一致）
+            const textColor = dotsConfig.bird.color;
+            const textColorSecondary = dotsConfig.bird.color;
+            
+            console.log('文字颜色:', textColor, '（与鸟波点一致）');
+            
+            // 测量文字尺寸（在缩放之前）
+            let cnWidth = 0, enWidth = 0;
+            let totalHeight = 0;
+            
+            // 使用固定较大字号
+            const baseFontSize = textObj.fontSize || 32;
+            
+            if (textObj.cn) {
+                const fontSize = baseFontSize;
+                ctx.font = `bold ${fontSize}px "Microsoft YaHei", "SimHei", sans-serif`;
+                cnWidth = ctx.measureText(textObj.cn).width;
+                ctx.fillStyle = textColor;
+                ctx.fillText(textObj.cn, 0, -fontSize * 0.6);
+                totalHeight += fontSize;
+                console.log('绘制中文名:', textObj.cn, 'fontSize:', fontSize, '宽度:', cnWidth);
+            }
+            
+            if (textObj.en) {
+                const fontSize = baseFontSize * 0.75;
+                ctx.font = `italic ${fontSize}px "Times New Roman", serif`;
+                enWidth = ctx.measureText(textObj.en).width;
+                ctx.fillStyle = textColorSecondary;
+                ctx.fillText(textObj.en, 0, baseFontSize * 0.4);
+                totalHeight += fontSize;
+                console.log('绘制学名:', textObj.en, 'fontSize:', fontSize, '宽度:', enWidth);
+            }
+            
+            ctx.restore();
+            
+            // 返回文字边界框（应用缩放）
+            const maxWidth = Math.max(cnWidth, enWidth) * t.scale;
+            const height = totalHeight * t.scale;
+            
+            console.log('文字边界框:', maxWidth, '×', height);
+            
+            return {
+                w: maxWidth,
+                h: height,
+                centerX,
+                centerY
+            };
+        }
+        
+        function renderPreview() {
+            renderBackground();
+            
+            // 如果生成了波点，先绘制波点背景层
+            if (dotsGenerated) {
+                renderDotsBackground();
+            }
+            
+            // 绘制图片层
+            const imgBounds = renderImage(objects.image);
+            
+            // 绘制文字层
+            const textBounds = renderText(objects.name);
+            
+            // 更新变换框
+            updateTransformBoxes({ image: imgBounds, name: textBounds });
+        }
+        
+        // ==================== 形状绘制函数 ====================
+        
+        function drawShape(ctx, x, y, size, shape, svgPath = '') {
+            ctx.save();
+            ctx.translate(x, y);
+            
+            switch(shape) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    break;
+                    
+                case 'square':
+                    ctx.fillRect(-size / 2, -size / 2, size, size);
+                    break;
+                    
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(0, -size / 2);
+                    ctx.lineTo(size / 2, size / 2);
+                    ctx.lineTo(-size / 2, size / 2);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
+                    
+                case 'star':
+                    drawStar(ctx, 0, 0, 5, size / 2, size / 4);
+                    break;
+                    
+                case 'heart':
+                    drawHeart(ctx, 0, 0, size / 2);
+                    break;
+                    
+                case 'svg':
+                    if (svgPath) {
+                        drawSVGPath(ctx, svgPath, size);
+                    } else {
+                        // 默认圆形
+                        ctx.beginPath();
+                        ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    break;
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - outerRadius);
+            
+            for (let i = 0; i < spikes; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            
+            ctx.lineTo(cx, cy - outerRadius);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        function drawHeart(ctx, cx, cy, size) {
+            ctx.beginPath();
+            const topCurveHeight = size * 0.3;
+            
+            ctx.moveTo(cx, cy + size / 4);
+            
+            // 左半边
+            ctx.bezierCurveTo(
+                cx, cy,
+                cx - size / 2, cy,
+                cx - size / 2, cy + topCurveHeight
+            );
+            ctx.bezierCurveTo(
+                cx - size / 2, cy + (size + topCurveHeight) / 2,
+                cx, cy + (size + topCurveHeight) / 2,
+                cx, cy + size
+            );
+            
+            // 右半边
+            ctx.bezierCurveTo(
+                cx, cy + (size + topCurveHeight) / 2,
+                cx + size / 2, cy + (size + topCurveHeight) / 2,
+                cx + size / 2, cy + topCurveHeight
+            );
+            ctx.bezierCurveTo(
+                cx + size / 2, cy,
+                cx, cy,
+                cx, cy + size / 4
+            );
+            
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        function drawSVGPath(ctx, pathData, size) {
+            try {
+                const path = new Path2D(pathData);
+                const scale = size / 10; // 假设SVG路径大小为10
+                ctx.scale(scale, scale);
+                ctx.fill(path);
+            } catch (e) {
+                console.error('SVG路径错误:', e);
+                // 降级为圆形
+                ctx.beginPath();
+                ctx.arc(0, 0, size / 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // ==================== 波点背景层渲染 ====================
+        
+        function renderDotsBackground() {
+            if (!objects.image.mask) return; // 需要蒙版来避开鸟区
+            
+            const spacing = dotsConfig.bg.spacing;
+            const size = dotsConfig.bg.size;
+            const shape = dotsConfig.bg.shape;
+            const svgPath = dotsConfig.bg.svgPath;
+            const imgObj = objects.image;
+            
+            // 计算图片在画布上的实际位置和尺寸
+            const img = imgObj.segmented || imgObj.data;
+            const t = imgObj.transform;
+            const nameSpace = 80;
+            const availableHeight = canvas.height - nameSpace;
+            const baseScale = Math.min(canvas.width / img.width, availableHeight / img.height);
+            const finalScale = baseScale * t.scale;
+            
+            const imgWidth = img.width * finalScale;
+            const imgHeight = img.height * finalScale;
+            const imgCenterX = canvas.width / 2 + t.x;
+            const imgCenterY = availableHeight / 2 + t.y;
+            
+            ctx.fillStyle = dotsConfig.bg.color;
+            
+            // 遍历画布绘制背景波点
+            for (let x = spacing / 2; x < canvas.width; x += spacing) {
+                for (let y = spacing / 2; y < canvas.height - nameSpace; y += spacing) {
+                    // 检查该点是否在鸟区域内（考虑旋转）
+                    if (isPointInBirdArea(x, y, imgCenterX, imgCenterY, imgWidth, imgHeight, t.rotation, img.width, img.height, imgObj.mask)) {
+                        continue; // 跳过鸟区域
+                    }
+                    
+                    // 绘制背景波点
+                    drawShape(ctx, x, y, size, shape, svgPath);
+                }
+            }
+        }
+        
+        // 检查点是否在鸟区域内（支持旋转）
+        function isPointInBirdArea(canvasX, canvasY, centerX, centerY, displayWidth, displayHeight, rotation, imgWidth, imgHeight, mask) {
+            // 1. 将画布坐标转换为相对于中心点的坐标
+            const dx = canvasX - centerX;
+            const dy = canvasY - centerY;
+            
+            // 2. 反向旋转（逆时针旋转-rotation角度）
+            const rad = -rotation * Math.PI / 180;
+            const cos = Math.cos(rad);
+            const sin = Math.sin(rad);
+            const rotatedX = dx * cos - dy * sin;
+            const rotatedY = dx * sin + dy * cos;
+            
+            // 3. 检查是否在矩形范围内
+            if (Math.abs(rotatedX) > displayWidth / 2 || Math.abs(rotatedY) > displayHeight / 2) {
+                return false; // 不在图片范围内
+            }
+            
+            // 4. 转换为图片坐标（0 到 imgWidth/imgHeight）
+            const scale = displayWidth / imgWidth;
+            const imgX = (rotatedX / scale) + imgWidth / 2;
+            const imgY = (rotatedY / scale) + imgHeight / 2;
+            
+            // 5. 检查蒙版
+            if (imgX >= 0 && imgX < imgWidth && imgY >= 0 && imgY < imgHeight) {
+                const maskIdx = Math.floor(imgY) * imgWidth + Math.floor(imgX);
+                return mask[maskIdx] > 128; // true = 鸟区域
+            }
+            
+            return false;
+        }
+        
+        // ==================== 图像分割 ====================
+        
+        async function segmentImage() {
+            const imgObj = objects.image;
+            if (!imgObj.data) {
+                alert('请先上传图片！');
+                return;
+            }
+            
+            updateStatusBar('正在分割...');
+            
+            // 创建临时画布
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = imgObj.data.width;
+            tempCanvas.height = imgObj.data.height;
+            
+            // 绘制原图
+            tempCtx.drawImage(imgObj.data, 0, 0);
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            const method = document.getElementById('segmentMethod').value;
+            const tolerance = parseInt(document.getElementById('toleranceSlider').value);
+            
+            console.log('开始分割:', method, '容差:', tolerance);
+            
+            let mask = null;
+            
+            try {
+                if (method === 'color_remove') {
+                    mask = segmentByColorRemoval(imageData, tolerance);
+                } else if (method === 'alpha') {
+                    mask = segmentByAlpha(imageData);
+                } else if (method === 'threshold') {
+                    mask = segmentByThreshold(imageData, tolerance);
+                }
+                
+                if (!mask) {
+                    alert('分割失败：未生成蒙版');
+                    updateStatusBar('分割失败');
+                    return;
+                }
+                
+                console.log('蒙版生成成功，前10个值:', Array.from(mask.slice(0, 10)));
+                
+                // 应用蒙版到原图
+                const segmentedData = tempCtx.createImageData(imageData.width, imageData.height);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const idx = i / 4;
+                    const alpha = mask[idx];
+                    
+                    // 复制RGB，设置透明度
+                    segmentedData.data[i] = imageData.data[i];         // R
+                    segmentedData.data[i + 1] = imageData.data[i + 1]; // G
+                    segmentedData.data[i + 2] = imageData.data[i + 2]; // B
+                    segmentedData.data[i + 3] = alpha;                 // A
+                }
+                
+                // 清空画布并绘制分割结果
+                tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+                tempCtx.putImageData(segmentedData, 0, 0);
+                
+                console.log('分割后图像已绘制到临时画布');
+                
+                // 创建分割后的图片
+                const segmentedImg = new Image();
+                segmentedImg.onload = () => {
+                    imgObj.segmented = segmentedImg;
+                    imgObj.mask = mask;
+                    
+                    console.log('✓ 分割图片加载完成');
+                    console.log('  - 原图尺寸:', imgObj.data.width, 'x', imgObj.data.height);
+                    console.log('  - 分割图尺寸:', segmentedImg.width, 'x', segmentedImg.height);
+                    
+                    // 显示分割统计信息
+                    const birdPixels = Array.from(mask).filter(v => v > 128).length;
+                    const birdPercent = (birdPixels / mask.length * 100).toFixed(1);
+                    const statusEl = document.getElementById('segmentStatus');
+                    if (statusEl) {
+                        statusEl.textContent = `✓ 分割完成：保留了${birdPercent}%的像素（鸟区域）`;
+                        statusEl.style.color = '#28a745';
+                        statusEl.style.fontWeight = '600';
+                    }
+                    
+                    updateStatusBar('✓ 分割完成！预览已更新为去背景图');
+                    document.getElementById('generateDotsBtn').disabled = false;
+                    
+                    // 强制重新渲染
+                    renderPreview();
+                };
+                segmentedImg.onerror = () => {
+                    console.error('分割图片加载失败');
+                    alert('分割图片加载失败');
+                    const statusEl = document.getElementById('segmentStatus');
+                    if (statusEl) {
+                        statusEl.textContent = '✗ 分割失败：图片加载错误';
+                        statusEl.style.color = '#dc3545';
+                    }
+                };
+                segmentedImg.src = tempCanvas.toDataURL('image/png');
+                
+            } catch (error) {
+                console.error('分割错误:', error);
+                alert('分割失败: ' + error.message);
+                updateStatusBar('分割失败');
+            }
+        }
+        
+        function segmentByColorRemoval(imageData, tolerance) {
+            const data = imageData.data;
+            const width = imageData.width;
+            const height = imageData.height;
+            
+            console.log('使用颜色去除法，容差:', tolerance);
+            
+            // 采样边缘像素作为背景色（增加采样密度）
+            const bgColors = [];
+            
+            // 上下边缘
+            for (let i = 0; i < width; i += 5) {
+                bgColors.push(getPixelColor(data, i, 0, width));
+                bgColors.push(getPixelColor(data, i, height - 1, width));
+            }
+            
+            // 左右边缘
+            for (let j = 0; j < height; j += 5) {
+                bgColors.push(getPixelColor(data, 0, j, width));
+                bgColors.push(getPixelColor(data, width - 1, j, width));
+            }
+            
+            // 计算平均背景色
+            const avgBg = {
+                r: bgColors.reduce((s, c) => s + c.r, 0) / bgColors.length,
+                g: bgColors.reduce((s, c) => s + c.g, 0) / bgColors.length,
+                b: bgColors.reduce((s, c) => s + c.b, 0) / bgColors.length
+            };
+            
+            console.log('平均背景色:', avgBg);
+            
+            // 生成蒙版
+            const mask = new Uint8Array(width * height);
+            let birdPixelCount = 0;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const idx = i / 4;
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                
+                // 计算与背景色的欧几里得距离
+                const diff = Math.sqrt(
+                    Math.pow(r - avgBg.r, 2) +
+                    Math.pow(g - avgBg.g, 2) +
+                    Math.pow(b - avgBg.b, 2)
+                );
+                
+                // 距离大于容差 = 鸟（保留），否则 = 背景（透明）
+                if (diff > tolerance) {
+                    mask[idx] = 255;  // 不透明
+                    birdPixelCount++;
+                } else {
+                    mask[idx] = 0;    // 透明
+                }
+            }
+            
+            console.log('鸟区像素数:', birdPixelCount, '占比:', (birdPixelCount / mask.length * 100).toFixed(2) + '%');
+            
+            return mask;
+        }
+        
+        function segmentByAlpha(imageData) {
+            const data = imageData.data;
+            const mask = new Uint8Array(imageData.width * imageData.height);
+            
+            console.log('使用透明通道分割');
+            
+            let opaqueCount = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const alpha = data[i + 3];
+                mask[i / 4] = alpha;
+                if (alpha > 128) opaqueCount++;
+            }
+            
+            console.log('不透明像素数:', opaqueCount, '占比:', (opaqueCount / mask.length * 100).toFixed(2) + '%');
+            
+            return mask;
+        }
+        
+        function segmentByThreshold(imageData, threshold) {
+            const data = imageData.data;
+            const mask = new Uint8Array(imageData.width * imageData.height);
+            
+            console.log('使用亮度阈值分割，阈值:', threshold);
+            
+            let brightCount = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                const brightness = (r + g + b) / 3;
+                
+                // 亮度大于阈值 = 保留
+                if (brightness > threshold) {
+                    mask[i / 4] = 255;
+                    brightCount++;
+                } else {
+                    mask[i / 4] = 0;
+                }
+            }
+            
+            console.log('保留像素数:', brightCount, '占比:', (brightCount / mask.length * 100).toFixed(2) + '%');
+            
+            return mask;
+        }
+        
+        function getPixelColor(data, x, y, width) {
+            const idx = (y * width + x) * 4;
+            return {
+                r: data[idx],
+                g: data[idx + 1],
+                b: data[idx + 2]
+            };
+        }
+        
+        // ==================== 波点生成 ====================
+        
+        function generateDots() {
+            const imgObj = objects.image;
+            if (!imgObj.segmented || !imgObj.mask) {
+                alert('请先执行分割！');
+                return;
+            }
+            
+            updateStatusBar('正在生成波点...');
+            
+            // 创建临时画布（原始尺寸，不受缩放影响）
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = imgObj.segmented.width;
+            tempCanvas.height = imgObj.segmented.height;
+            
+            // 绘制原图获取颜色信息
+            tempCtx.drawImage(imgObj.data, 0, 0);
+            const colorData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // 清空画布
+            tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // 获取配置
+            const dotSize = dotsConfig.bird.size;
+            const densityFactor = dotsConfig.bird.density;
+            const shape = dotsConfig.bird.shape;
+            const svgPath = dotsConfig.bird.svgPath;
+            const spacing = dotsConfig.bird.spacing; // 使用配置的间隔
+            const mask = imgObj.mask;
+            
+            tempCtx.fillStyle = dotsConfig.bird.color;
+            
+            // 生成鸟区波点（使用可配置间隔，不受缩放影响）
+            let dotCount = 0;
+            
+            for (let y = 0; y < tempCanvas.height; y += spacing) {
+                for (let x = 0; x < tempCanvas.width; x += spacing) {
+                    const idx = y * tempCanvas.width + x;
+                    
+                    if (mask[idx] > 128) {  // 鸟区域
+                        // 获取该点颜色
+                        const colorIdx = idx * 4;
+                        const r = colorData.data[colorIdx];
+                        const g = colorData.data[colorIdx + 1];
+                        const b = colorData.data[colorIdx + 2];
+                        const brightness = (r + g + b) / 3;
+                        
+                        // 根据亮度调整密度（颜色越深越稀疏，越浅越密集）
+                        // brightness: 0(黑) ~ 255(白)
+                        // brightnessFactor: 0(黑) ~ 1(白)
+                        const brightnessFactor = brightness / 255;
+                        
+                        // 密度计算：亮处密集，暗处稀疏
+                        // densityFactor=0: density恒为1（不考虑颜色）
+                        // densityFactor>0: 越亮density越高，越暗density越低
+                        let density;
+                        if (densityFactor === 0) {
+                            density = 1; // 统一密度
+                        } else {
+                            // 亮处: brightnessFactor接近1 → density接近1
+                            // 暗处: brightnessFactor接近0 → density接近1/(1+densityFactor)
+                            density = (brightnessFactor * densityFactor + 1) / (densityFactor + 1);
+                        }
+                        
+                        if (Math.random() < density) {
+                            drawShape(tempCtx, x, y, dotSize, shape, svgPath);
+                            dotCount++;
+                        }
+                    }
+                }
+            }
+            
+            console.log('生成波点数:', dotCount, '间隔:', spacing, 'px');
+            
+            dotsImageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            dotsGenerated = true;
+            
+            updateStatusBar(`波点生成完成！共生成 ${dotCount} 个波点`);
+            document.getElementById('downloadBtn').disabled = false;
+            renderPreview();
+        }
+        
+        // ==================== 变换框系统 ====================
+        
+        function updateTransformBoxes(bounds) {
+            const overlay = document.getElementById('transformOverlay');
+            overlay.innerHTML = '';
+            
+            // 为每个对象创建变换框
+            ['image', 'name'].forEach(objKey => {
+                const b = bounds[objKey];
+                if (!b || !objects[objKey].visible) return;
+                
+                const box = createTransformBox(objKey, b);
+                overlay.appendChild(box);
+            });
+        }
+        
+        function createTransformBox(objKey, bounds) {
+            const box = document.createElement('div');
+            box.className = 'transform-box';
+            box.dataset.object = objKey;
+            
+            if (objKey === currentObject) {
+                box.classList.add('selected');
+            }
+            
+            // 设置位置
+            const canvasRect = canvas.getBoundingClientRect();
+            const left = (bounds.centerX - bounds.w / 2) / canvas.width * 100;
+            const top = (bounds.centerY - bounds.h / 2) / canvas.height * 100;
+            const width = bounds.w / canvas.width * 100;
+            const height = bounds.h / canvas.height * 100;
+            
+            box.style.left = `${left}%`;
+            box.style.top = `${top}%`;
+            box.style.width = `${width}%`;
+            box.style.height = `${height}%`;
+            
+            // 添加手柄
+            ['nw', 'ne', 'sw', 'se'].forEach(corner => {
+                const handle = document.createElement('div');
+                handle.className = `corner-handle handle-${corner}`;
+                handle.dataset.corner = corner;
+                box.appendChild(handle);
+            });
+            
+            // 旋转手柄
+            const rotateHandle = document.createElement('div');
+            rotateHandle.className = 'rotate-handle';
+            box.appendChild(rotateHandle);
+            
+            return box;
+        }
+        
+        // ==================== 事件监听 ====================
+        
+        // 上传图片
+        document.getElementById('birdImage').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    objects.image.data = img;
+                    objects.image.segmented = null;
+                    objects.image.mask = null;
+                    objects.image.transform = { x: 0, y: 0, scale: 0.8, rotation: 0 };
+                    
+                    dotsGenerated = false;
+                    dotsImageData = null;
+                    
+                    currentObject = 'image';
+                    updateObjectList();
+                    
+                    document.getElementById('segmentBtn').disabled = false;
+                    
+                    updateStatusBar('图片已加载');
+                    renderPreview();
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        // 对象选择
+        document.querySelectorAll('.object-item').forEach(item => {
+            item.addEventListener('click', () => {
+                currentObject = item.dataset.object;
+                updateObjectList();
+                renderPreview();
+            });
+        });
+        
+        function updateObjectList() {
+            document.querySelectorAll('.object-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.object === currentObject);
+            });
+        }
+        
+        // 分割
+        document.getElementById('segmentBtn').addEventListener('click', segmentImage);
+        
+        // 生成波点
+        document.getElementById('generateDotsBtn').addEventListener('click', generateDots);
+        
+        // 形状选择
+        document.getElementById('bgDotShape').addEventListener('change', (e) => {
+            dotsConfig.bg.shape = e.target.value;
+            document.getElementById('bgSvgInput').style.display = 
+                e.target.value === 'svg' ? 'block' : 'none';
+            if (dotsGenerated) renderPreview(); // 实时更新
+        });
+        
+        document.getElementById('birdDotShape').addEventListener('change', (e) => {
+            dotsConfig.bird.shape = e.target.value;
+            document.getElementById('birdSvgInput').style.display = 
+                e.target.value === 'svg' ? 'block' : 'none';
+            if (dotsGenerated) generateDots(); // 重新生成鸟区波点
+        });
+        
+        // SVG路径输入
+        document.getElementById('bgSvgPath').addEventListener('input', (e) => {
+            dotsConfig.bg.svgPath = e.target.value;
+            if (dotsGenerated) renderPreview();
+        });
+        
+        document.getElementById('birdSvgPath').addEventListener('input', (e) => {
+            dotsConfig.bird.svgPath = e.target.value;
+            if (dotsGenerated) generateDots();
+        });
+        
+        // 波点参数
+        ['bgDotColor', 'bgDotSize', 'bgDotSpacing', 'birdDotColor', 'birdDotSize', 'birdDotSpacing', 'birdDensity'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            
+            el.addEventListener('input', (e) => {
+                const key = id.replace('bgDot', '').replace('birdDot', '').replace('birdDensity', 'density').replace('birdSpacing', 'spacing');
+                const layer = id.startsWith('bg') ? 'bg' : 'bird';
+                const prop = key.toLowerCase();
+                
+                if (prop === 'color') {
+                    dotsConfig[layer].color = e.target.value;
+                } else {
+                    dotsConfig[layer][prop] = parseFloat(e.target.value);
+                    const valueEl = document.getElementById(id + 'Value');
+                    if (valueEl) valueEl.textContent = e.target.value;
+                }
+                
+                if (dotsGenerated) {
+                    if (layer === 'bg') {
+                        // 背景层参数改变，只需重新渲染
+                        renderPreview();
+                    } else {
+                        // 鸟区参数改变，需要重新生成
+                        generateDots();
+                    }
+                } else {
+                    renderPreview();
+                }
+            });
+        });
+        
+        // 容差
+        document.getElementById('toleranceSlider').addEventListener('input', (e) => {
+            document.getElementById('toleranceValue').textContent = e.target.value;
+        });
+        
+        // 名称
+        document.getElementById('birdNameCN').addEventListener('input', (e) => {
+            objects.name.cn = e.target.value;
+            console.log('更新中文名:', objects.name.cn);
+            renderPreview();
+        });
+        
+        document.getElementById('birdNameEN').addEventListener('input', (e) => {
+            objects.name.en = e.target.value;
+            console.log('更新学名:', objects.name.en);
+            renderPreview();
+        });
+        
+        document.getElementById('showName').addEventListener('change', (e) => {
+            objects.name.visible = e.target.checked;
+            console.log('显示名称:', objects.name.visible);
+            renderPreview();
+        });
+        
+        // 背景切换
+        document.querySelectorAll('.bg-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentBgType = btn.dataset.bg;
+                renderPreview();
+            });
+        });
+        
+        // 下载
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            // 临时切换到透明背景
+            const originalBg = currentBgType;
+            currentBgType = 'transparent';
+            
+            // 重新渲染
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (dotsGenerated) {
+                renderDotsBackground();
+            }
+            renderImage(objects.image);
+            renderText(objects.name);
+            
+            // 下载
+            const link = document.createElement('a');
+            const filename = `防鸟撞贴纸_${objects.name.cn || 'bird'}_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.png`;
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // 恢复背景
+            currentBgType = originalBg;
+            renderPreview();
+            
+            updateStatusBar('已下载');
+        });
+        
+        // ==================== 变换框交互 ====================
+        
+        let activeAction = null;
+        let activeCorner = null;
+        let dragStartX = 0, dragStartY = 0;
+        let startTransform = {};
+        let centerPoint = null;
+        
+        document.getElementById('transformOverlay').addEventListener('mousedown', (e) => {
+            const target = e.target;
+            
+            // 旋转手柄
+            if (target.classList.contains('rotate-handle')) {
+                e.stopPropagation();
+                activeAction = 'rotate';
+                const box = target.closest('.transform-box');
+                currentObject = box.dataset.object;
+                updateObjectList();
+                
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startTransform = { ...objects[currentObject].transform };
+                
+                const rect = canvas.getBoundingClientRect();
+                centerPoint = {
+                    x: rect.left + canvas.width / 2 + startTransform.x,
+                    y: rect.top + canvas.height / 2 + startTransform.y
+                };
+                return;
+            }
+            
+            // 缩放手柄
+            if (target.classList.contains('corner-handle')) {
+                e.stopPropagation();
+                activeAction = 'scale';
+                activeCorner = target.dataset.corner;
+                const box = target.closest('.transform-box');
+                currentObject = box.dataset.object;
+                updateObjectList();
+                
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startTransform = { ...objects[currentObject].transform };
+                
+                const rect = canvas.getBoundingClientRect();
+                centerPoint = {
+                    x: rect.left + canvas.width / 2 + startTransform.x,
+                    y: rect.top + canvas.height / 2 + startTransform.y
+                };
+                return;
+            }
+            
+            // 移动框体
+            if (target.classList.contains('transform-box')) {
+                activeAction = 'move';
+                currentObject = target.dataset.object;
+                updateObjectList();
+                
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                startTransform = { ...objects[currentObject].transform };
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!activeAction) return;
+            
+            const dx = e.clientX - dragStartX;
+            const dy = e.clientY - dragStartY;
+            const t = objects[currentObject].transform;
+            
+            if (activeAction === 'move') {
+                t.x = startTransform.x + dx;
+                t.y = startTransform.y + dy;
+            } else if (activeAction === 'scale') {
+                const startDist = Math.sqrt(
+                    Math.pow(dragStartX - centerPoint.x, 2) + 
+                    Math.pow(dragStartY - centerPoint.y, 2)
+                );
+                const currentDist = Math.sqrt(
+                    Math.pow(e.clientX - centerPoint.x, 2) + 
+                    Math.pow(e.clientY - centerPoint.y, 2)
+                );
+                const scaleRatio = currentDist / startDist;
+                t.scale = Math.max(0.2, Math.min(3, startTransform.scale * scaleRatio));
+            } else if (activeAction === 'rotate') {
+                const startAngle = Math.atan2(dragStartY - centerPoint.y, dragStartX - centerPoint.x);
+                const currentAngle = Math.atan2(e.clientY - centerPoint.y, e.clientX - centerPoint.x);
+                const angleDelta = (currentAngle - startAngle) * 180 / Math.PI;
+                t.rotation = (startTransform.rotation + angleDelta) % 360;
+                if (t.rotation < 0) t.rotation += 360;
+            }
+            
+            renderPreview();
+            updateStatusBar(`${currentObject} | 位置: (${Math.round(t.x)}, ${Math.round(t.y)}) | 缩放: ${(t.scale * 100).toFixed(0)}% | 旋转: ${Math.round(t.rotation)}°`);
+        });
+        
+        document.addEventListener('mouseup', () => {
+            activeAction = null;
+            activeCorner = null;
+        });
+        
+        // 滚轮缩放
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const t = objects[currentObject].transform;
+            const delta = e.deltaY > 0 ? -0.05 : 0.05;
+            t.scale = Math.max(0.2, Math.min(3, t.scale + delta));
+            renderPreview();
+        });
+        
+        function updateStatusBar(text) {
+            document.getElementById('statusBar').textContent = text;
+        }
+        
+        // 初始化
+        renderBackground();
+        updateObjectList();
+    </script>
+</body>
+</html>
