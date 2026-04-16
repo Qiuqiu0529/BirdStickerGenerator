@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>防鸟撞贴纸生成器 v16</title>
+    <title>防鸟撞贴纸生成器 / Bird Strike Prevention Sticker Generator</title>
     <style>
         * {
             margin: 0;
@@ -32,12 +32,51 @@
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
         }
 
         .header h1 {
             font-size: 32px;
             margin-bottom: 10px;
         }
+        .lang-switcher {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            min-width: 50px;
+        }
+
+        .lang-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background: white;
+            color: #667eea;
+            border-color: white;
+            font-weight: 600;
+        }
+
 
         .content {
             display: flex;
@@ -378,8 +417,13 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🦅 防鸟撞贴纸生成器 v16</h1>
-            <p>多对象独立控制 · 三层波点系统 · 实时预览</p>
+            <div class="lang-switcher">
+                <button class="lang-btn" id="langZH" onclick="switchLanguage('zh-CN')">中文</button>
+                <button class="lang-btn" id="langEN" onclick="switchLanguage('en')">EN</button>
+            </div>
+
+            <h1>🦅 <span data-i18n="title">防鸟撞贴纸生成器</span> </h1>
+            <p data-i18n="subtitle">通过波点艺术生成专业的防鸟撞玻璃贴纸</p>
         </div>
 
         <div class="content">
@@ -387,7 +431,7 @@
             <div class="sidebar">
                 <!-- 1. 上传图片 -->
                 <div class="section">
-                    <div class="section-title">📸 上传图片</div>
+                    <div class="section-title" data-i18n="imageUpload">📤 图片上传</div>
                     <div class="input-group">
                         <input type="file" id="birdImage" accept="image/*">
                     </div>
@@ -395,153 +439,147 @@
 
                 <!-- 2. 对象列表 -->
                 <div class="section">
-                    <div class="section-title">🎯 对象选择</div>
+                    <div class="section-title" data-i18n="objectList">📦 对象列表</div>
                     <div class="object-list" id="objectList">
                         <div class="object-item" data-object="image">
-                            📷 鸟类图片
+                            <span data-i18n="birdImage">🖼️ 鸟类图片</span>
                         </div>
                         <div class="object-item" data-object="name">
-                            📝 名称文字
+                            <span data-i18n="nameText">📝 名称文字</span>
                         </div>
                     </div>
-                    <small>点击对象进行编辑</small>
+                    <small><span data-i18n="click">点击</span><span data-i18n="toSelect">选中对象</span></small>
                 </div>
 
                 <!-- 3. 图像分割 -->
                 <div class="section">
-                    <div class="section-title">✂️ 图像分割</div>
+                    <div class="section-title" data-i18n="imageSegmentation">✂️ 图像分割</div>
                     <div class="input-group">
-                        <label>分割方法</label>
+                        <label data-i18n="segmentMethod">分割方法</label>
                         <select id="segmentMethod">
-                            <option value="color_remove">去除纯色背景（推荐）</option>
-                            <option value="alpha">透明通道</option>
-                            <option value="threshold">亮度阈值</option>
+                            <option value="color_remove" data-i18n="removeColorBg">去除纯色背景（推荐）</option>
+                            <option value="alpha" data-i18n="alphaChannel">透明通道</option>
+                            <option value="threshold" data-i18n="brightnessThreshold">亮度阈值</option>
                         </select>
                     </div>
                     <div class="input-group">
                         <label>
-                            容差: <span class="range-value" id="toleranceValue">40</span>
+                            <span data-i18n="tolerance">容差</span>: <span class="range-value" id="toleranceValue">40</span>
                         </label>
                         <input type="range" id="toleranceSlider" min="10" max="100" value="40">
-                        <small>值越大，保留越多；建议30-50</small>
+                        <small data-i18n="toleranceHint2">值越大，保留越多；建议30-50</small>
                     </div>
-                    <button class="btn btn-secondary" id="segmentBtn" disabled>
-                        执行分割
-                    </button>
+                    <button class="btn btn-secondary" id="segmentBtn" disabled data-i18n="executeSegment">执行分割</button>
                     <div id="segmentStatus" style="margin-top: 8px; font-size: 12px; color: #666;"></div>
                 </div>
 
                 <!-- 4. 波点背景层 -->
                 <div class="section">
-                    <div class="section-title">🎨 波点背景层</div>
+                    <div class="section-title" data-i18n="backgroundLayer">🎨 波点背景层</div>
                     <div class="input-group">
-                        <label>波点形状</label>
+                        <label data-i18n="dotShape">波点形状</label>
                         <select id="bgDotShape">
-                            <option value="circle">⚫ 圆点</option>
-                            <option value="star">⭐ 星形</option>
-                            <option value="heart">❤️ 爱心</option>
-                            <option value="square">◼️ 方形</option>
-                            <option value="triangle">▲ 三角形</option>
-                            <option value="svg">🎨 自定义SVG</option>
+                            <option value="circle" data-i18n="circle">圆点</option>
+                            <option value="star" data-i18n="star">星形</option>
+                            <option value="heart" data-i18n="heart">爱心</option>
+                            <option value="square" data-i18n="square">方形</option>
+                            <option value="triangle" data-i18n="triangle">三角形</option>
+                            <option value="svg" data-i18n="customSVG">自定义SVG</option>
                         </select>
                     </div>
                     <div class="input-group" id="bgSvgInput" style="display: none;">
-                        <label>SVG路径 (d属性)</label>
+                        <label data-i18n="svgPath">SVG路径 (d属性)</label>
                         <input type="text" id="bgSvgPath" placeholder="例: M0,-5 L5,5 L-5,5 Z">
-                        <small>输入SVG path的d属性</small>
+                        <small data-i18n="svgPathHint">输入SVG path的d属性</small>
                     </div>
                     <div class="input-group">
-                        <label>波点颜色</label>
+                        <label data-i18n="dotColor">波点颜色</label>
                         <input type="color" id="bgDotColor" value="#ffffff">
                     </div>
                     <div class="input-group">
                         <label>
-                            波点大小: <span class="range-value" id="bgDotSizeValue">5</span> px
+                            <span data-i18n="dotSize">波点大小</span>: <span class="range-value" id="bgDotSizeValue">5</span> px
                         </label>
                         <input type="range" id="bgDotSize" min="1" max="15" value="5">
                     </div>
                     <div class="input-group">
                         <label>
-                            波点间隔: <span class="range-value" id="bgDotSpacingValue">25</span> px
+                            <span data-i18n="dotSpacing">波点间隔</span>: <span class="range-value" id="bgDotSpacingValue">25</span> px
                         </label>
                         <input type="range" id="bgDotSpacing" min="5" max="60" value="25">
-                        <small>规律网格间距</small>
+                        <small data-i18n="gridSpacingHint">规律网格间距</small>
                     </div>
                 </div>
 
                 <!-- 5. 鸟区波点层 -->
                 <div class="section">
-                    <div class="section-title">🦅 鸟区波点层</div>
+                    <div class="section-title" data-i18n="birdLayer">🦅 鸟区波点层</div>
                     <div class="input-group">
-                        <label>波点形状</label>
+                        <label data-i18n="dotShape">波点形状</label>
                         <select id="birdDotShape">
-                            <option value="circle">⚫ 圆点</option>
-                            <option value="star">⭐ 星形</option>
-                            <option value="heart">❤️ 爱心</option>
-                            <option value="square">◼️ 方形</option>
-                            <option value="triangle">▲ 三角形</option>
-                            <option value="svg">🎨 自定义SVG</option>
+                            <option value="circle" data-i18n="circle">圆点</option>
+                            <option value="star" data-i18n="star">星形</option>
+                            <option value="heart" data-i18n="heart">爱心</option>
+                            <option value="square" data-i18n="square">方形</option>
+                            <option value="triangle" data-i18n="triangle">三角形</option>
+                            <option value="svg" data-i18n="customSVG">自定义SVG</option>
                         </select>
                     </div>
                     <div class="input-group" id="birdSvgInput" style="display: none;">
-                        <label>SVG路径 (d属性)</label>
+                        <label data-i18n="svgPath">SVG路径 (d属性)</label>
                         <input type="text" id="birdSvgPath" placeholder="例: M0,-5 L5,5 L-5,5 Z">
-                        <small>输入SVG path的d属性</small>
+                        <small data-i18n="svgPathHint">输入SVG path的d属性</small>
                     </div>
                     <div class="input-group">
-                        <label>波点颜色</label>
+                        <label data-i18n="dotColor">波点颜色</label>
                         <input type="color" id="birdDotColor" value="#ffffff">
                     </div>
                     <div class="input-group">
                         <label>
-                            波点大小: <span class="range-value" id="birdDotSizeValue">5</span> px
+                            <span data-i18n="dotSize">波点大小</span>: <span class="range-value" id="birdDotSizeValue">5</span> px
                         </label>
                         <input type="range" id="birdDotSize" min="1" max="15" value="5">
                     </div>
                     <div class="input-group">
                         <label>
-                            波点间隔: <span class="range-value" id="birdDotSpacingValue">8</span> px
+                            <span data-i18n="dotSpacing">波点间隔</span>: <span class="range-value" id="birdDotSpacingValue">8</span> px
                         </label>
                         <input type="range" id="birdDotSpacing" min="5" max="30" value="8">
-                        <small>采样间隔，越小越密集</small>
+                        <small data-i18n="samplingSpacingHint">采样间隔，越小越密集</small>
                     </div>
                     <div class="input-group">
                         <label>
-                            密度系数: <span class="range-value" id="birdDensityValue">1</span>
+                            <span data-i18n="densityFactor">密度系数</span>: <span class="range-value" id="birdDensityValue">1</span>
                         </label>
                         <input type="range" id="birdDensity" min="0" max="5" step="0.5" value="1">
-                        <small>颜色越深越稀疏，越浅越密集</small>
+                        <small data-i18n="densityHint">颜色越深越稀疏，越浅越密集</small>
                     </div>
-                    <button class="btn btn-success" id="generateDotsBtn" disabled>
-                        生成波点
-                    </button>
+                    <button class="btn btn-success" id="generateDotsBtn" disabled data-i18n="generateDots">生成波点</button>
                 </div>
 
                 <!-- 6. 名称设置 -->
                 <div class="section">
-                    <div class="section-title">📝 名称设置</div>
+                    <div class="section-title" data-i18n="nameSettings">📝 名称设置</div>
                     <div class="input-group">
                         <div class="checkbox-group">
                             <input type="checkbox" id="showName" checked>
-                            <label>显示名称</label>
+                            <label data-i18n="showName">显示名称</label>
                         </div>
                     </div>
                     <div class="input-group">
-                        <label>中文名</label>
+                        <label data-i18n="chineseName">中文名</label>
                         <input type="text" id="birdNameCN" placeholder="例：黑脸琵鹭">
                     </div>
                     <div class="input-group">
-                        <label>学名</label>
+                        <label data-i18n="scientificName">学名</label>
                         <input type="text" id="birdNameEN" placeholder="例：Platalea minor">
                     </div>
                 </div>
 
                 <!-- 7. 下载 -->
                 <div class="section">
-                    <div class="section-title">💾 导出</div>
-                    <button class="btn btn-warning" id="downloadBtn" disabled>
-                        下载 PNG
-                    </button>
+                    <div class="section-title" data-i18n="export">💾 导出</div>
+                    <button class="btn btn-warning" id="downloadBtn" disabled data-i18n="downloadPNG">下载 PNG</button>
                 </div>
             </div>
 
@@ -549,9 +587,9 @@
             <div class="preview-area">
                 <div class="canvas-container">
                     <div class="preview-header">
-                        <span style="font-weight: 600; color: #666;">实时预览</span>
+                        <span style="font-weight: 600; color: #666;" data-i18n="preview">实时预览</span>
                         <div class="bg-selector">
-                            <span style="font-size: 13px; color: #666;">背景:</span>
+                            <span style="font-size: 13px; color: #666;" data-i18n="previewBg">背景:</span>
                             <div class="bg-btn bg-checkerboard active" data-bg="checkerboard"></div>
                             <div class="bg-btn bg-black" data-bg="black"></div>
                             <div class="bg-btn bg-gray" data-bg="gray"></div>
@@ -575,6 +613,258 @@
     </div>
 
     <script>
+        // ==================== 国际化配置 ====================
+        
+        const i18n = {
+            'zh-CN': {
+                title: '防鸟撞贴纸生成器',
+                subtitle: '通过波点艺术生成专业的防鸟撞玻璃贴纸',
+                
+                // 章节标题
+                imageUpload: '📤 图片上传',
+                imageSegmentation: '✂️ 图像分割',
+                backgroundLayer: '🎨 波点背景层',
+                birdLayer: '🦅 鸟区波点层',
+                nameSettings: '📝 名称设置',
+                objectList: '📦 对象列表',
+                preview: '👁️ 实时预览',
+                
+                // 图片上传
+                selectBirdImage: '选择鸟类图片',
+                imageSelected: '已选择图片',
+                imageLoaded: '图片已加载',
+                
+                // 图像分割
+                segmentMethod: '分割方法',
+                removePureBg: '去除纯色背景',
+                manualSelect: '手动选择鸟区域',
+                tolerance: '容差',
+                toleranceHint: '值越大，去除范围越广',
+                executeSegment: '执行分割',
+                segmentSuccess: '分割完成',
+                
+                // 背景层
+                dotShape: '波点形状',
+                circle: '圆点',
+                star: '星形',
+                heart: '爱心',
+                square: '方形',
+                triangle: '三角形',
+                customSVG: '自定义SVG',
+                dotColor: '波点颜色',
+                dotSize: '波点大小',
+                dotSpacing: '波点间隔',
+                gridSpacingHint: '规律网格间距',
+                
+                // 鸟区层
+                samplingSpacingHint: '采样间隔，越小越密集',
+                densityFactor: '密度系数',
+                densityHint: '颜色越深越稀疏，越浅越密集',
+                generateDots: '生成波点',
+                dotsGenerating: '正在生成波点...',
+                dotsGenerated: '波点生成完成！共生成',
+                dots: '个波点',
+                
+                // 名称设置
+                showName: '显示名称',
+                chineseName: '中文名',
+                scientificName: '学名',
+                chineseNamePlaceholder: '如：黑脸琵鹭',
+                scientificNamePlaceholder: '如：Platalea minor',
+                
+                // 预览
+                previewBg: '预览背景',
+                checkerboard: '棋盘格',
+                black: '黑色',
+                white: '白色',
+                gray: '灰色',
+                downloadPNG: '下载 PNG',
+                exportingImage: '正在导出图片...',
+                
+                // 对象列表
+                birdImage: '🖼️ 鸟类图片',
+                nameText: '📝 名称文字',
+                click: '点击',
+                toSelect: '选中对象',
+                
+                // 状态栏
+                statusReady: '准备就绪',
+                statusUploading: '正在上传...',
+                statusSegmenting: '正在分割...',
+                statusGenerating: '正在生成波点...',
+                
+                // 提示
+                uploadHint: '上传一张鸟类图片开始创作',
+                removeColorBg: '去除纯色背景（推荐）',
+                alphaChannel: '透明通道',
+                brightnessThreshold: '亮度阈值',
+                svgPath: 'SVG路径 (d属性)',
+                svgPathHint: '输入SVG path的d属性',
+                export: '导出',
+                toleranceHint2: '值越大，保留越多；建议30-50',
+                segmentHint: '上传图片后执行分割',
+                generateHint: '分割图片后生成波点',
+                
+                // 错误信息
+                errorNoImage: '请先上传图片',
+                errorNoSegmentation: '请先执行图像分割',
+                errorSegmentFailed: '分割失败，请重试'
+            },
+            'en': {
+                title: 'Bird Strike Prevention Sticker Generator',
+                subtitle: 'Generate professional bird strike prevention glass stickers through dot art',
+                
+                // Section titles
+                imageUpload: '📤 Image Upload',
+                imageSegmentation: '✂️ Image Segmentation',
+                backgroundLayer: '🎨 Background Dots Layer',
+                birdLayer: '🦅 Bird Area Dots Layer',
+                nameSettings: '📝 Name Settings',
+                objectList: '📦 Object List',
+                preview: '👁️ Live Preview',
+                
+                // Image upload
+                selectBirdImage: 'Select Bird Image',
+                imageSelected: 'Image Selected',
+                imageLoaded: 'Image Loaded',
+                
+                // Image segmentation
+                segmentMethod: 'Segmentation Method',
+                removePureBg: 'Remove Pure Background',
+                manualSelect: 'Manual Bird Area Selection',
+                tolerance: 'Tolerance',
+                toleranceHint: 'Higher value removes more area',
+                executeSegment: 'Execute Segmentation',
+                segmentSuccess: 'Segmentation Complete',
+                
+                // Background layer
+                dotShape: 'Dot Shape',
+                circle: 'Circle',
+                star: 'Star',
+                heart: 'Heart',
+                square: 'Square',
+                triangle: 'Triangle',
+                customSVG: 'Custom SVG',
+                dotColor: 'Dot Color',
+                dotSize: 'Dot Size',
+                dotSpacing: 'Dot Spacing',
+                gridSpacingHint: 'Regular grid spacing',
+                
+                // Bird area layer
+                samplingSpacingHint: 'Sampling interval, smaller = denser',
+                densityFactor: 'Density Factor',
+                densityHint: 'Darker = sparser, lighter = denser',
+                generateDots: 'Generate Dots',
+                dotsGenerating: 'Generating dots...',
+                dotsGenerated: 'Dots generation complete! Total generated:',
+                dots: 'dots',
+                
+                // Name settings
+                showName: 'Show Name',
+                chineseName: 'Name',
+                scientificName: 'Scientific Name',
+                chineseNamePlaceholder: 'e.g., Black-faced Spoonbill',
+                scientificNamePlaceholder: 'e.g., Platalea minor',
+                
+                // Preview
+                previewBg: 'Preview Background',
+                checkerboard: 'Checkerboard',
+                black: 'Black',
+                white: 'White',
+                gray: 'Gray',
+                downloadPNG: 'Download PNG',
+                exportingImage: 'Exporting image...',
+                
+                // Object list
+                birdImage: '🖼️ Bird Image',
+                nameText: '📝 Name Text',
+                click: 'Click',
+                toSelect: 'to select object',
+                
+                // Status bar
+                statusReady: 'Ready',
+                statusUploading: 'Uploading...',
+                statusSegmenting: 'Segmenting...',
+                statusGenerating: 'Generating dots...',
+                
+                // Hints
+                uploadHint: 'Upload a bird image to start',
+                removeColorBg: 'Remove Pure Background (Recommended)',
+                alphaChannel: 'Alpha Channel',
+                brightnessThreshold: 'Brightness Threshold',
+                svgPath: 'SVG Path (d attribute)',
+                svgPathHint: 'Enter SVG path d attribute',
+                export: 'Export',
+                toleranceHint2: 'Higher value retains more; recommend 30-50',
+                segmentHint: 'Execute segmentation after uploading',
+                generateHint: 'Generate dots after segmentation',
+                
+                // Error messages
+                errorNoImage: 'Please upload an image first',
+                errorNoSegmentation: 'Please execute image segmentation first',
+                errorSegmentFailed: 'Segmentation failed, please try again'
+            }
+        };
+        
+        // 检测浏览器语言
+        let currentLang = 'zh-CN';
+        const browserLang = navigator.language || navigator.userLanguage;
+        
+        if (browserLang.startsWith('en')) {
+            currentLang = 'en';
+        } else if (browserLang.startsWith('zh')) {
+            currentLang = 'zh-CN';
+        }
+        
+        // 检查localStorage中的用户偏好
+        const savedLang = localStorage.getItem('preferredLang');
+        if (savedLang && (savedLang === 'zh-CN' || savedLang === 'en')) {
+            currentLang = savedLang;
+        }
+        
+        // 获取翻译文本
+        function t(key) {
+            return i18n[currentLang][key] || key;
+        }
+        
+        
+        // 切换语言
+        function switchLanguage(lang) {
+            currentLang = lang;
+            updatePageLanguage();
+            updateLangButtons();
+            
+            // 更新状态栏
+            updateStatusBar(t('statusReady'));
+            
+            // 保存到localStorage
+            localStorage.setItem('preferredLang', lang);
+        }
+        
+        // 更新语言按钮状态
+        function updateLangButtons() {
+            document.getElementById('langZH').classList.toggle('active', currentLang === 'zh-CN');
+            document.getElementById('langEN').classList.toggle('active', currentLang === 'en');
+        }
+        
+// 更新页面文本
+        function updatePageLanguage() {
+            // 更新所有带 data-i18n 属性的元素
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (el.tagName === 'INPUT' && (el.type === 'button' || el.type === 'submit')) {
+                    el.value = t(key);
+                } else if (el.tagName === 'INPUT' && el.placeholder !== undefined) {
+                    el.placeholder = t(key);
+                } else {
+                    el.textContent = t(key);
+                }
+            });
+            
+            // 更新文档标题
+            document.title = t('title') + '';
+        }
+        
         // ==================== 核心数据结构 ====================
         
         const canvas = document.getElementById('previewCanvas');
@@ -1003,7 +1293,7 @@
                 return;
             }
             
-            updateStatusBar('正在分割...');
+            updateStatusBar(t('statusSegmenting'));
             
             // 创建临时画布
             const tempCanvas = document.createElement('canvas');
@@ -1018,7 +1308,7 @@
             const method = document.getElementById('segmentMethod').value;
             const tolerance = parseInt(document.getElementById('toleranceSlider').value);
             
-            console.log('开始分割:', method, '容差:', tolerance);
+            console.log('开始分割:', method, '<span data-i18n="tolerance">容差</span>:', tolerance);
             
             let mask = null;
             
@@ -1107,7 +1397,7 @@
             const width = imageData.width;
             const height = imageData.height;
             
-            console.log('使用颜色去除法，容差:', tolerance);
+            console.log('使用颜色去除法，<span data-i18n="tolerance">容差</span>:', tolerance);
             
             // 采样边缘像素作为背景色（增加采样密度）
             const bgColors = [];
@@ -1227,7 +1517,7 @@
                 return;
             }
             
-            updateStatusBar('正在生成波点...');
+            updateStatusBar(t('statusGenerating'));
             
             // 创建临时画布（原始尺寸，不受缩放影响）
             const tempCanvas = document.createElement('canvas');
@@ -1379,7 +1669,7 @@
                     
                     document.getElementById('segmentBtn').disabled = false;
                     
-                    updateStatusBar('图片已加载');
+                    updateStatusBar(t('imageLoaded'));
                     renderPreview();
                 };
                 img.src = event.target.result;
@@ -1644,8 +1934,13 @@
         }
         
         // 初始化
-        renderBackground();
-        updateObjectList();
+        window.addEventListener('DOMContentLoaded', () => {
+            updatePageLanguage();
+            updateLangButtons();  // 更新界面语言
+            renderBackground();
+            updateObjectList();
+            updateStatusBar(t('statusReady'));
+        });
     </script>
 </body>
 </html>
